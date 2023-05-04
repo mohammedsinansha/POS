@@ -64,6 +64,7 @@ button {
 button:hover {
   background-color: #c82333;
 }
+
 input[type="checkbox"] {
   position: relative;
   width: 60px;
@@ -95,4 +96,48 @@ input[type="checkbox"]:checked {
 
 input[type="checkbox"]:checked::before {
   left: 30px;
+}
+
+/* For screens smaller than 600px */
+@media screen and (max-width: 600px) {
+  /* Make the form inputs stack vertically */
+  form label,
+  form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  /* Center the Add Sale button */
+  form button {
+    margin: 0 auto;
+    display: block;
+  }
+  
+  /* Make the table responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  /* Hide the table headers */
+  table thead {
+    display: none;
+  }
+  
+  /* Make the table cells stack vertically */
+  table tbody tr {
+    display: block;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  /* Add a label to each table cell */
+  table tbody td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+  }
 }
