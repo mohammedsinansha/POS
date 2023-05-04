@@ -141,3 +141,62 @@ input[type="checkbox"]:checked::before {
     margin-right: 10px;
   }
 }
+/* For screens smaller than or equal to 375px (iPhone screens) */
+@media screen and (max-width: 375px) {
+  /* Make the form inputs stack vertically */
+  form label,
+  form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  /* Center the Add Sale button */
+  form button {
+    margin: 0 auto;
+    display: block;
+  }
+  
+  /* Make the table responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  /* Hide the table headers */
+  table thead {
+    display: none;
+  }
+  
+  /* Make the table cells stack vertically */
+  table tbody tr {
+    display: block;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  /* Add a label to each table cell */
+  table tbody td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+  }
+  
+  /* Adjust checkbox size */
+  input[type="checkbox"] {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    border-radius: 13px;
+  }
+  
+  input[type="checkbox"]::before {
+    width: 20px;
+    height: 20px;
+    top: 3px;
+    left: 3px;
+  }
+}
+
