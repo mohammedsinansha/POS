@@ -1,0 +1,98 @@
+/* Style for form and labels */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="checkbox"] {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-left: 5px;
+}
+
+/* Style for sales table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Style for delete button */
+button {
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #c82333;
+}
+input[type="checkbox"] {
+  position: relative;
+  width: 60px;
+  height: 34px;
+  -webkit-appearance: none;
+  background-color: #ccc;
+  outline: none;
+  border-radius: 34px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+}
+
+input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  top: 4px;
+  left: 4px;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: left 0.3s;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #4caf50;
+}
+
+input[type="checkbox"]:checked::before {
+  left: 30px;
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - A Pen by Mohammed Sinan Sha</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sales Table</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+  </head>
+  <body>
+    <h1>Sales Table</h1>
+    
+    <form>
+      <label for="customer-name">Customer Name:</label>
+      <input type="text" id="customer-name" name="customer-name"><br>
+      
+      <label for="customer-address">Customer Address:</label>
+      <input type="text" id="customer-address" name="customer-address"><br>
+      
+      <label for="delivery-price">Delivery Price:</label>
+      <input type="text" id="delivery-price" name="delivery-price"><br>
+      
+      <label for="gas-amount">Gas Amount:</label>
+      <input type="text" id="gas-amount" name="gas-amount"><br>
+      
+      <label for="paid">Paid:</label>
+      <input type="checkbox" id="paid" name="paid" value="paid" checked><br>
+      
+      <button type="button" onclick="addSale()">Add Sale</button>
+    </form>
+    
+    <table id="sales-table">
+      <thead>
+        <tr>
+          <th>Customer Name</th>
+          <th>Customer Address</th>
+          <th>Delivery Price</th>
+          <th>Gas Amount</th>
+          <th>Total Amount</th>
+          <th>Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    
+    <script src="scripts.js"></script>
+  </body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
