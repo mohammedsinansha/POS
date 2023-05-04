@@ -61,6 +61,7 @@ function showSales() {
     var gasAmountCell = row.insertCell(3);
     var totalAmountCell = row.insertCell(4);
     var paidCell = row.insertCell(5);
+    var deleteCell = row.insertCell(6);
 
     // Fill cells with sale data
     nameCell.innerHTML = sale.customerName;
@@ -69,5 +70,28 @@ function showSales() {
     gasAmountCell.innerHTML = sale.gasAmount;
     totalAmountCell.innerHTML = sale.totalAmount;
     paidCell.innerHTML = sale.paid ? "Yes" : "No";
+
+// Add delete button to cell
+var deleteButton = document.createElement("button");
+deleteButton.innerHTML = "Delete";
+deleteButton.onclick = (function(index) {
+  return function() {
+    deleteSale(index);
+  };
+})(i);
+deleteCell.appendChild(deleteButton);
+
+    // Change row color if sale is not paid
+    if (!sale.paid) {
+      row.style.backgroundColor = "red";
+    }
   }
+}
+
+function deleteSale(index) {
+  // Remove sale from sales array at the given index
+  sales.splice(index, 1);
+
+  // Refresh sales table
+  showSales();
 }
