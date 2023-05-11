@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>Daily Book</title>
+  <title>Daliy Book</title>
   <link rel="stylesheet" href="./style.css">
 
 </head>
@@ -20,13 +20,16 @@
       <label for="delivery-price">Delivery Price:</label>
       <input type="text" id="delivery-price" name="delivery-price"><br>
       
-      <label for="gas-amount">Gas Amount:</label>
+      <label for="gas-amount">Item Amount:</label>
       <input type="number" id="gas-amount" name="gas-amount"><br>
       
       <label for="paid">Paid:</label>
       <input type="checkbox" id="paid" name="paid" value="paid" checked><br>
       
       <button type="button" onclick="addSale()">Add Sale</button>
+      <button class="profit" onclick="showProfit()">Show Profit</button>
+
+
     </form>
     
     <table id="sales-table">
@@ -35,7 +38,7 @@
           <th>Customer Name</th>
           <th>Customer Address</th>
           <th>Delivery Price</th>
-          <th>Gas Amount</th>
+          <th>Item Amount</th>
           <th>Total Amount</th>
           <th>Paid</th>
           
