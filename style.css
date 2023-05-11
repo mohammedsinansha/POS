@@ -1,4 +1,5 @@
 /* Style for form and labels */
+
 form {
   display: flex;
   flex-direction: column;
@@ -60,7 +61,21 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-
+.profit{
+  background-color: #35dc59;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  left: 120px;
+  bottom: 37px;
+}
 button:hover {
   background-color: #c82333;
 }
