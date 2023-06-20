@@ -167,7 +167,7 @@ function showProfit() {
   // Calculate total gas cost and selling price
   for (var i = 0; i < sales.length; i++) {
     var sale = sales[i];
-    totalGasCost += parseFloat(sale.gasAmount) * 19.5;
+    totalGasCost += parseFloat(sale.gasAmount) * 21;
     totalSellingPrice += parseFloat(sale.totalAmount);
   }
 
