@@ -1,180 +1,125 @@
-/* Style for form and labels */
-*{
-  padding: 0;
-  margin: 0;
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-dark: #1e40af;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --border: #e5e7eb;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
-body{
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Inter, sans-serif;
+  background: radial-gradient(circle at top right, #dbeafe, var(--bg) 40%);
+  color: var(--text);
 }
-h1{
-  text-align: center;
-  padding-bottom: 30px;
-  font-weight: bold;
-  font-family: 'Inter', sans-serif;
-}
-form {
+
+.app-shell { max-width: 1300px; margin: 0 auto; padding: 1.2rem; display: grid; gap: 1rem; }
+.topbar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
   display: flex;
-  justify-content: center;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
-  margin-bottom: 20px;
-  background: rgb(133,133,136);
-  background: linear-gradient(90deg, rgba(133,133,136,1) 0%, rgba(69,69,69,1) 68%, rgba(111,111,111,1) 100%);
+  box-shadow: var(--shadow);
 }
+.eyebrow { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+h1 { font-size: 1.6rem; }
+.topbar-actions { display: flex; align-items: end; gap: 0.6rem; }
 
-label {
-  margin-bottom: 5px;
-  font-weight: bold;
+.kpi-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(4, minmax(130px, 1fr)); }
+.kpi-card {
+  background: linear-gradient(135deg, #eff6ff, #fff);
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 0.9rem;
 }
+.kpi-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
 
-input[type="text"],
-input[type="number"],
-input[type="checkbox"] {
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 15px;
-  border: none;
-  width: 25;
-  font-size: 16px;
-  box-sizing: border-box;
+.workspace { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
 }
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; gap: 0.5rem; }
 
-input[type="checkbox"] {
-  width: auto;
-  margin-left: 5px;
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.7rem;
+  max-height: 460px;
+  overflow: auto;
+  padding-right: 0.2rem;
 }
-
-/* Style for sales table */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 20px;
+.product-card {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.4rem;
 }
+.product-card small { color: var(--muted); }
+.product-card .stock.low { color: var(--danger); font-weight: 600; }
 
-th,
-td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.field { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+.field input, .field select, #productSearch, .inventory-form input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.95rem;
+  background: white;
 }
+.field.compact { min-width: 180px; }
 
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-/* Style for delete button */
-button {
-  background-color: #dc3545;
-  border: none;
+.btn {
+  background: var(--primary);
   color: white;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  border-radius: 5px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.56rem 0.8rem;
   cursor: pointer;
-  position: relative;
-  right: 53px;
+  font-weight: 600;
 }
-.profit{
-  background-color: #35dc59;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  position: relative;
-  left: 67px;
-  bottom: 39px;
+.btn:hover { background: var(--primary-dark); }
+.btn.ghost { background: #e2e8f0; color: #1f2937; }
+.btn.danger { background: var(--danger); }
+
+.cart-list-wrap { overflow: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid var(--border); padding: 0.55rem; text-align: left; font-size: 0.92rem; }
+
+tbody tr:last-child td { border-bottom: none; }
+.checkout-form { display: grid; gap: 0.6rem; margin-top: 0.8rem; }
+.totals { border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); padding: 0.6rem 0; display: grid; gap: 0.28rem; }
+.totals p { display: flex; justify-content: space-between; color: var(--muted); }
+.totals .grand-total { color: var(--text); font-size: 1.05rem; font-weight: 700; }
+
+.receipt { margin-top: 0.8rem; background: #0b1020; color: #e5e7eb; border-radius: 10px; padding: 0.7rem; }
+.receipt pre { white-space: pre-wrap; font-size: 0.8rem; margin-top: 0.35rem; }
+
+.inventory-admin { margin-top: 0.8rem; }
+.inventory-form { margin-top: 0.6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.inventory-form button { grid-column: span 2; }
+
+.history-panel { margin-top: 0.2rem; }
+
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
-button:hover {
-  background-color: #c82333;
+@media (max-width: 620px) {
+  .topbar { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+  .topbar-actions { width: 100%; }
+  .kpi-grid { grid-template-columns: 1fr; }
 }
-
-input[type="checkbox"] {
-  position: relative;
-  width: 60px;
-  height: 34px;
-  -webkit-appearance: none;
-  background-color: #ccc;
-  outline: none;
-  border-radius: 34px;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s;
-}
-
-input[type="checkbox"]::before {
-  content: '';
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  top: 4px;
-  left: 4px;
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  transition: left 0.3s;
-}
-
-input[type="checkbox"]:checked {
-  background-color: #4caf50;
-}
-
-input[type="checkbox"]:checked::before {
-  left: 30px;
-}
-
-/* For screens smaller than 600px */
-@media screen and (max-width: 600px) {
-  /* Make the form inputs stack vertically */
-  form label,
-  form input {
-    display: block;
-    width: 50%;
-    margin-bottom: 10px;
-  }
-  
-  /* Center the Add Sale button */
-  form button {
-    margin: 0 auto;
-    display: block;
-  }
-  
-  /* Make the table responsive */
-  table {
-    display: block;
-    overflow-x: auto;
-  }
-  
-  /* Hide the table headers */
-  table thead {
-    display: none;
-  }
-  
-  /* Make the table cells stack vertically */
-  table tbody tr {
-    display: block;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  /* Add a label to each table cell */
-  table tbody td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    display: inline-block;
-    width: 100px;
-    margin-right: 10px;
-  }
-}
-
-
-

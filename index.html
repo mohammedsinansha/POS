@@ -1,57 +1,138 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
-  <title>Daily Book</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaPOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-    <h1>Sales Table</h1>
-    
-    <form>
-      <label for="customer-name">Customer Name:</label>
-      <input type="text" id="customer-name" name="customer-name"><br>
-      
-      <label for="customer-address">Customer Address:</label>
-      <input type="text" id="customer-address" name="customer-address"><br>
-      
-      <label for="delivery-price">Price:</label>
-      <input type="text" id="delivery-price" name="delivery-price"><br>
-      
-      <label for="gas-amount">Quantity:</label>
-      <input type="number" id="gas-amount" name="gas-amount"><br>
-      
-      <label for="paid">Paid:</label>
-      <input type="checkbox" id="paid" name="paid" value="paid" checked><br>
-      
-      <button type="button" onclick="addSale()">Add Sale</button>
-      <button class="profit" onclick="showProfit()">Show Profit</button>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Retail Command Center</p>
+        <h1>NovaPOS</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="field compact">
+          <span>Cashier</span>
+          <input id="cashierName" type="text" placeholder="e.g. Fatima" />
+        </label>
+        <button id="newSaleBtn" class="btn ghost">New Sale</button>
+      </div>
+    </header>
 
+    <section class="kpi-grid" id="kpiGrid">
+      <article class="kpi-card"><p>Today's Revenue</p><h2 id="kpiRevenue">$0.00</h2></article>
+      <article class="kpi-card"><p>Transactions</p><h2 id="kpiTransactions">0</h2></article>
+      <article class="kpi-card"><p>Average Ticket</p><h2 id="kpiAverage">$0.00</h2></article>
+      <article class="kpi-card"><p>Low Stock SKUs</p><h2 id="kpiLowStock">0</h2></article>
+    </section>
 
-    </form>
-    
-    <table id="sales-table">
-      <thead>
-        <tr>
-          <th>Customer Name</th>
-          <th>Customer Address</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Total Amount</th>
-          <th>Paid</th>
-          
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-    
-    <script src="./script.js"></script>
+    <section class="workspace">
+      <div class="panel products-panel">
+        <div class="panel-header">
+          <h3>Products</h3>
+          <input id="productSearch" type="search" placeholder="Search SKU or name" />
+        </div>
+        <div id="productGrid" class="product-grid"></div>
 
+        <details class="inventory-admin">
+          <summary>Inventory Manager</summary>
+          <form id="productForm" class="inventory-form">
+            <input id="productName" type="text" placeholder="Name" required />
+            <input id="productSku" type="text" placeholder="SKU" required />
+            <input id="productPrice" type="number" min="0" step="0.01" placeholder="Price" required />
+            <input id="productStock" type="number" min="0" step="1" placeholder="Stock" required />
+            <button class="btn" type="submit">Add Product</button>
+          </form>
+        </details>
+      </div>
+
+      <div class="panel cart-panel">
+        <div class="panel-header"><h3>Current Sale</h3></div>
+        <div class="cart-list-wrap">
+          <table id="cartTable">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+          </table>
+        </div>
+
+        <form id="checkoutForm" class="checkout-form">
+          <label class="field">
+            <span>Discount (%)</span>
+            <input id="discount" type="number" min="0" max="100" value="0" />
+          </label>
+          <label class="field">
+            <span>Tax (%)</span>
+            <input id="tax" type="number" min="0" max="100" value="10" />
+          </label>
+          <label class="field">
+            <span>Payment Method</span>
+            <select id="paymentMethod">
+              <option value="Cash">Cash</option>
+              <option value="Card">Card</option>
+              <option value="Mobile Wallet">Mobile Wallet</option>
+              <option value="Split">Split</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Amount Received</span>
+            <input id="amountReceived" type="number" min="0" step="0.01" value="0" />
+          </label>
+
+          <div class="totals">
+            <p><span>Subtotal</span><strong id="subtotal">$0.00</strong></p>
+            <p><span>Discount</span><strong id="discountValue">-$0.00</strong></p>
+            <p><span>Tax</span><strong id="taxValue">$0.00</strong></p>
+            <p class="grand-total"><span>Total</span><strong id="grandTotal">$0.00</strong></p>
+            <p><span>Change</span><strong id="changeDue">$0.00</strong></p>
+          </div>
+
+          <button class="btn" type="submit">Complete Sale</button>
+        </form>
+
+        <article class="receipt" id="receipt">
+          <h4>Receipt Preview</h4>
+          <pre id="receiptContent">No completed sale yet.</pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel history-panel">
+      <div class="panel-header">
+        <h3>Sales History</h3>
+        <button id="clearHistoryBtn" class="btn danger">Clear History</button>
+      </div>
+      <div class="cart-list-wrap">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Receipt #</th>
+              <th>Time</th>
+              <th>Cashier</th>
+              <th>Items</th>
+              <th>Payment</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
 </body>
 </html>
