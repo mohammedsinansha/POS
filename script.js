@@ -1,179 +1,297 @@
-var sales = [];
+const STORAGE_KEY = "novapos-state-v1";
 
-function addSale() {
-  // Get form values
-  var customerName = document.getElementById("customer-name").value;
-  var customerAddress = document.getElementById("customer-address").value;
-  var deliveryPrice = document.getElementById("delivery-price").value;
-  var gasAmount = document.getElementById("gas-amount").value;
-  var paid = document.getElementById("paid").checked;
-  var totalAmount = calculateTotal(deliveryPrice, gasAmount);
+const DEFAULT_PRODUCTS = [
+  { id: crypto.randomUUID(), name: "Coffee 250g", sku: "CF-250", price: 8.5, stock: 42 },
+  { id: crypto.randomUUID(), name: "Milk 1L", sku: "MLK-1L", price: 2.2, stock: 25 },
+  { id: crypto.randomUUID(), name: "Bread Loaf", sku: "BR-LOAF", price: 1.8, stock: 14 },
+  { id: crypto.randomUUID(), name: "Chocolate Bar", sku: "CH-80", price: 1.25, stock: 8 },
+  { id: crypto.randomUUID(), name: "Orange Juice", sku: "OJ-1L", price: 3.9, stock: 12 }
+];
 
-  // Create new sale object
-  var sale = {
-    customerName: customerName,
-    customerAddress: customerAddress,
-    deliveryPrice: deliveryPrice,
-    gasAmount: gasAmount,
-    totalAmount: totalAmount,
-    paid: paid
-  };
+const state = {
+  products: [],
+  cart: [],
+  history: []
+};
 
-  // Add sale to sales array
-  sales.push(sale);
+const productGrid = document.getElementById("productGrid");
+const cartBody = document.getElementById("cartBody");
+const historyBody = document.getElementById("historyBody");
+const receiptContent = document.getElementById("receiptContent");
+const cashierNameInput = document.getElementById("cashierName");
 
-  // Clear form inputs
-  document.getElementById("customer-name").value = "";
-  document.getElementById("customer-address").value = "";
-  document.getElementById("delivery-price").value = "";
-  document.getElementById("gas-amount").value = "";
-  document.getElementById("paid").checked = false;
-
-  // Refresh sales table
-  showSales();
+function money(value) {
+  return `$${value.toFixed(2)}`;
 }
 
-function calculateTotal(deliveryPrice, gasAmount) {
-  // Calculate total amount based on delivery price and gas amount
-  var total = parseFloat(deliveryPrice) * parseFloat(gasAmount);
-
-  return total;
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    products: state.products,
+    history: state.history,
+    cashierName: cashierNameInput.value.trim()
+  }));
 }
 
-function showSales() {
-  // Get sales table body element
-  var tableBody = document.getElementById("sales-table").getElementsByTagName('tbody')[0];
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    state.products = DEFAULT_PRODUCTS;
+    return;
+  }
 
-  // Clear current table rows
-  tableBody.innerHTML = "";
+  try {
+    const data = JSON.parse(raw);
+    state.products = Array.isArray(data.products) && data.products.length ? data.products : DEFAULT_PRODUCTS;
+    state.history = Array.isArray(data.history) ? data.history : [];
+    cashierNameInput.value = data.cashierName || "";
+  } catch {
+    state.products = DEFAULT_PRODUCTS;
+  }
+}
 
-  // Add new table rows for each sale
-  for (var i = 0; i < sales.length; i++) {
-    var sale = sales[i];
+function computeTotals() {
+  const discountRate = Number(document.getElementById("discount").value || 0) / 100;
+  const taxRate = Number(document.getElementById("tax").value || 0) / 100;
+  const subtotal = state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const discount = subtotal * discountRate;
+  const taxable = Math.max(0, subtotal - discount);
+  const tax = taxable * taxRate;
+  const total = taxable + tax;
+  return { subtotal, discount, tax, total };
+}
 
-    // Create new row element
-    var row = tableBody.insertRow(i);
+function renderProducts() {
+  const search = document.getElementById("productSearch").value.trim().toLowerCase();
+  const filtered = state.products.filter((p) =>
+    [p.name, p.sku].some((v) => v.toLowerCase().includes(search))
+  );
 
-    // Add cells to row
-    var nameCell = row.insertCell(0);
-    var addressCell = row.insertCell(1);
-    var deliveryPriceCell = row.insertCell(2);
-    var gasAmountCell = row.insertCell(3);
-    var totalAmountCell = row.insertCell(4);
-    var paidCell = row.insertCell(5);
-    var deleteCell = row.insertCell(6);
+  productGrid.innerHTML = "";
+  filtered.forEach((product) => {
+    const card = document.createElement("article");
+    card.className = "product-card";
+    card.innerHTML = `
+      <strong>${product.name}</strong>
+      <small>SKU: ${product.sku}</small>
+      <small>${money(product.price)}</small>
+      <small class="stock ${product.stock <= 5 ? "low" : ""}">Stock: ${product.stock}</small>
+      <button class="btn" ${product.stock <= 0 ? "disabled" : ""}>Add to Cart</button>
+    `;
+    card.querySelector("button").addEventListener("click", () => addToCart(product.id));
+    productGrid.appendChild(card);
+  });
+}
 
-    // Fill cells with sale data
-    nameCell.innerHTML = sale.customerName;
-    addressCell.innerHTML = sale.customerAddress;
-    deliveryPriceCell.innerHTML = sale.deliveryPrice;
-    gasAmountCell.innerHTML = sale.gasAmount;
-    totalAmountCell.innerHTML = sale.totalAmount;
-    paidCell.innerHTML = sale.paid ? "Yes" : "No";
+function addToCart(productId) {
+  const product = state.products.find((p) => p.id === productId);
+  if (!product || product.stock <= 0) return;
 
-// Add delete button to cell
-var deleteButton = document.createElement("button");
-deleteButton.innerHTML = "Delete";
-deleteButton.onclick = (function(index) {
-  return function() {
-    deleteSale(index);
-  };
-})(i);
-deleteCell.appendChild(deleteButton);
+  const line = state.cart.find((item) => item.productId === productId);
+  if (line) {
+    if (line.qty >= product.stock) return;
+    line.qty += 1;
+  } else {
+    state.cart.push({ productId, name: product.name, price: product.price, qty: 1 });
+  }
 
-    // Change row color if sale is not paid
-    if (!sale.paid) {
-      row.style.backgroundColor = "red";
+  renderCart();
+}
+
+function updateCartQty(productId, qty) {
+  const product = state.products.find((p) => p.id === productId);
+  const line = state.cart.find((item) => item.productId === productId);
+  if (!product || !line) return;
+
+  line.qty = Math.max(1, Math.min(Number(qty) || 1, product.stock));
+  renderCart();
+}
+
+function removeFromCart(productId) {
+  state.cart = state.cart.filter((item) => item.productId !== productId);
+  renderCart();
+}
+
+function renderCart() {
+  cartBody.innerHTML = "";
+
+  state.cart.forEach((line) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${line.name}</td>
+      <td><input data-role="qty" type="number" min="1" value="${line.qty}" style="width:70px"></td>
+      <td>${money(line.price)}</td>
+      <td>${money(line.price * line.qty)}</td>
+      <td><button class="btn danger" data-role="remove">×</button></td>
+    `;
+    row.querySelector('[data-role="qty"]').addEventListener("input", (e) => updateCartQty(line.productId, e.target.value));
+    row.querySelector('[data-role="remove"]').addEventListener("click", () => removeFromCart(line.productId));
+    cartBody.appendChild(row);
+  });
+
+  const totals = computeTotals();
+  const amountReceived = Number(document.getElementById("amountReceived").value || 0);
+  const change = amountReceived - totals.total;
+
+  document.getElementById("subtotal").textContent = money(totals.subtotal);
+  document.getElementById("discountValue").textContent = `-${money(totals.discount)}`;
+  document.getElementById("taxValue").textContent = money(totals.tax);
+  document.getElementById("grandTotal").textContent = money(totals.total);
+  document.getElementById("changeDue").textContent = money(change > 0 ? change : 0);
+}
+
+function renderHistory() {
+  historyBody.innerHTML = "";
+  [...state.history].reverse().forEach((sale) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${sale.receiptNo}</td>
+      <td>${new Date(sale.timestamp).toLocaleString()}</td>
+      <td>${sale.cashier || "-"}</td>
+      <td>${sale.items.reduce((sum, i) => sum + i.qty, 0)}</td>
+      <td>${sale.paymentMethod}</td>
+      <td>${money(sale.total)}</td>
+    `;
+    historyBody.appendChild(row);
+  });
+}
+
+function renderKPIs() {
+  const today = new Date().toDateString();
+  const todaySales = state.history.filter((sale) => new Date(sale.timestamp).toDateString() === today);
+  const revenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
+  const average = todaySales.length ? revenue / todaySales.length : 0;
+  const lowStock = state.products.filter((p) => p.stock <= 5).length;
+
+  document.getElementById("kpiRevenue").textContent = money(revenue);
+  document.getElementById("kpiTransactions").textContent = String(todaySales.length);
+  document.getElementById("kpiAverage").textContent = money(average);
+  document.getElementById("kpiLowStock").textContent = String(lowStock);
+}
+
+function completeSale(event) {
+  event.preventDefault();
+  if (!state.cart.length) {
+    alert("Cart is empty.");
+    return;
+  }
+
+  const totals = computeTotals();
+  const amountReceived = Number(document.getElementById("amountReceived").value || 0);
+  if (amountReceived < totals.total) {
+    alert("Amount received is less than total.");
+    return;
+  }
+
+  for (const line of state.cart) {
+    const product = state.products.find((p) => p.id === line.productId);
+    if (!product || product.stock < line.qty) {
+      alert(`Insufficient stock for ${line.name}`);
+      return;
     }
   }
+
+  state.cart.forEach((line) => {
+    const product = state.products.find((p) => p.id === line.productId);
+    product.stock -= line.qty;
+  });
+
+  const sale = {
+    receiptNo: `R-${String(state.history.length + 1).padStart(5, "0")}`,
+    timestamp: new Date().toISOString(),
+    cashier: cashierNameInput.value.trim(),
+    paymentMethod: document.getElementById("paymentMethod").value,
+    subtotal: totals.subtotal,
+    discount: totals.discount,
+    tax: totals.tax,
+    total: totals.total,
+    received: amountReceived,
+    change: amountReceived - totals.total,
+    items: state.cart.map((x) => ({ ...x }))
+  };
+
+  state.history.push(sale);
+  receiptContent.textContent = formatReceipt(sale);
+
+  state.cart = [];
+  renderProducts();
+  renderCart();
+  renderHistory();
+  renderKPIs();
+  saveState();
 }
 
-function deleteSale(index) {
-  // Remove sale from sales array at the given index
-  sales.splice(index, 1);
+function formatReceipt(sale) {
+  const lines = [
+    `Receipt ${sale.receiptNo}`,
+    `${new Date(sale.timestamp).toLocaleString()}`,
+    `Cashier: ${sale.cashier || "N/A"}`,
+    "--------------------------------",
+    ...sale.items.map((i) => `${i.name} x${i.qty}  ${money(i.qty * i.price)}`),
+    "--------------------------------",
+    `Subtotal: ${money(sale.subtotal)}`,
+    `Discount: -${money(sale.discount)}`,
+    `Tax: ${money(sale.tax)}`,
+    `Total: ${money(sale.total)}`,
+    `Paid: ${money(sale.received)} via ${sale.paymentMethod}`,
+    `Change: ${money(sale.change)}`,
+    "Thank you for shopping!"
+  ];
 
-  // Refresh sales table
-  showSales();
+  return lines.join("\n");
 }
-function showSales() {
-  // Get sales table body element
-  var tableBody = document.getElementById("sales-table").getElementsByTagName('tbody')[0];
 
-  // Clear current table rows
-  tableBody.innerHTML = "";
+function addProduct(event) {
+  event.preventDefault();
+  const name = document.getElementById("productName").value.trim();
+  const sku = document.getElementById("productSku").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const stock = Number(document.getElementById("productStock").value);
 
-  // Add new table rows for each sale
-  var totalSales = 0;
-  for (var i = 0; i < sales.length; i++) {
-    var sale = sales[i];
-
-    // Create new row element
-    var row = tableBody.insertRow(i);
-
-    // Add cells to row
-    var nameCell = row.insertCell(0);
-    var addressCell = row.insertCell(1);
-    var deliveryPriceCell = row.insertCell(2);
-    var gasAmountCell = row.insertCell(3);
-    var totalAmountCell = row.insertCell(4);
-    var paidCell = row.insertCell(5);
-    var deleteCell = row.insertCell(6);
-
-    // Fill cells with sale data
-    nameCell.innerHTML = sale.customerName;
-    addressCell.innerHTML = sale.customerAddress;
-    deliveryPriceCell.innerHTML = sale.deliveryPrice;
-    gasAmountCell.innerHTML = sale.gasAmount;
-    totalAmountCell.innerHTML = sale.totalAmount;
-    paidCell.innerHTML = sale.paid ? "Yes" : "No";
-
-    // Add to total sales
-    totalSales += sale.totalAmount;
-    
-
-    // Add delete button to cell
-    var deleteButton = document.createElement("button");
-    deleteButton.innerHTML = "Delete";
-    deleteButton.onclick = (function(index) {
-      return function() {
-        deleteSale(index);
-      };
-    })(i);
-    deleteCell.appendChild(deleteButton);
-
-    // Change row color if sale is not paid
-    if (!sale.paid) {
-      row.style.backgroundColor = "red";
-    }
+  if (!name || !sku || price < 0 || stock < 0) return;
+  if (state.products.some((p) => p.sku.toLowerCase() === sku.toLowerCase())) {
+    alert("SKU already exists.");
+    return;
   }
 
-  // Add total sales row
-  var totalRow = tableBody.insertRow(sales.length);
-  var totalLabelCell = totalRow.insertCell(0);
-  totalLabelCell.colSpan = 4;
-  totalLabelCell.innerHTML = "Total Sales:";
-  var totalAmountCell = totalRow.insertCell(1);
-  totalAmountCell.innerHTML = totalSales.toFixed(2);
-  var emptyCell1 = totalRow.insertCell(2);
-  var emptyCell2 = totalRow.insertCell(3);
-  var emptyCell3 = totalRow.insertCell(4);
-  var emptyCell4 = totalRow.insertCell(5);
-  var emptyCell5 = totalRow.insertCell(6);
+  state.products.push({ id: crypto.randomUUID(), name, sku, price, stock });
+  event.target.reset();
+  renderProducts();
+  renderKPIs();
+  saveState();
 }
-function showProfit() {
-  var totalGasCost = 0;
-  var totalSellingPrice = 0;
 
-  // Calculate total gas cost and selling price
-  for (var i = 0; i < sales.length; i++) {
-    var sale = sales[i];
-    totalGasCost += parseFloat(sale.gasAmount) * 21;
-    totalSellingPrice += parseFloat(sale.totalAmount);
-  }
-
-  // Calculate profit
-  var profit = totalSellingPrice - totalGasCost;
-
-  // Display profit
-  alert("Your profit is: " + profit.toFixed(2));
+function clearHistory() {
+  if (!confirm("Clear all sales history?")) return;
+  state.history = [];
+  renderHistory();
+  renderKPIs();
+  saveState();
 }
+
+function resetCurrentSale() {
+  state.cart = [];
+  document.getElementById("discount").value = 0;
+  document.getElementById("tax").value = 10;
+  document.getElementById("amountReceived").value = 0;
+  renderCart();
+}
+
+function init() {
+  loadState();
+  renderProducts();
+  renderCart();
+  renderHistory();
+  renderKPIs();
+
+  document.getElementById("productSearch").addEventListener("input", renderProducts);
+  document.getElementById("discount").addEventListener("input", renderCart);
+  document.getElementById("tax").addEventListener("input", renderCart);
+  document.getElementById("amountReceived").addEventListener("input", renderCart);
+  document.getElementById("checkoutForm").addEventListener("submit", completeSale);
+  document.getElementById("productForm").addEventListener("submit", addProduct);
+  document.getElementById("clearHistoryBtn").addEventListener("click", clearHistory);
+  document.getElementById("newSaleBtn").addEventListener("click", resetCurrentSale);
+  cashierNameInput.addEventListener("input", saveState);
+}
+
+init();
